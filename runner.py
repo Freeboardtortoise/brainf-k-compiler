@@ -18,11 +18,11 @@ def run(code):
     pointer = 0
     pc = 0  # program counter
     loop_stack = []
-    plugin_manager = plugins.pluginManager()
+    plugin_manager = plugins.PluginManager()
 
     while pc < len(code):
         cmd = code[pc]
-        memory, pointer, cmd, pc = plugin_manager.update(memory, pointer, cmd, pc)
+        memory, pointer, cmd = plugin_manager.update(memory, pointer, cmd, pc)
 
         if cmd == '>':
             pointer += 1
