@@ -1,7 +1,8 @@
 import sys
 import tty
 import termios
-import plugins.main as plugins
+import plugins.main as plugin
+import time
 
 def get_char():
     """Reads a single character from stdin without requiring Enter (Unix only)."""
@@ -13,17 +14,28 @@ def get_char():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-def run(code):
+
+def run(code, plugins, delay=None):
     memory = [0]
     pointer = 0
     pc = 0  # program counter
     loop_stack = []
-    plugin_manager = plugins.PluginManager()
-
+    plugin_manager = plugin.PluginManager(plugins)
+    if delay != None:
+        import time
     while pc < len(code):
         cmd = code[pc]
-        memory, pointer, cmd = plugin_manager.update(memory, pointer, cmd, pc)
+        plugin_manager.memory = memory
+        plugin_manager.pointer = pointer
+        plugin_manager.pc = pc
 
+        cmd = plugin_manager.update(cmd)
+
+        memory = plugin_manager.memory
+        pointer = plugin_manager.pointer
+        pc = plugin_manager.pc
+        if delay != None:
+            time.sleep(delay/100)
         if cmd == '>':
             pointer += 1
             if pointer >= len(memory):
@@ -71,4 +83,3 @@ def run(code):
                 loop_stack.pop()
 
         pc += 1
-
