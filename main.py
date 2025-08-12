@@ -37,13 +37,19 @@ if len(sys.argv) == 1:
     quit()
 
 if sys.argv[1+change] == "compile":
+    if len(sys.argv) == 2:
+        help("compile")
     file = "None"
     plugins = []
     doing_plugins = []
     output = "None"
     for number, argument in enumerate(sys.argv):
         if argument == "-f":
-            file = sys.argv[number+1]
+            if len(sys.argv)-1 >= number+1:
+                file = sys.argv[number+1]
+            else:
+                print("no file provided after -f tag")
+                quit()
         if doing_plugins:
             if argument != "-p" or "-o":
                 plugins = plugins + [argument]
@@ -52,7 +58,11 @@ if sys.argv[1+change] == "compile":
         if argument == "-p":
             doing_plugins = True
         if argument == "-o":
-            output = sys.argv[number+1]
+            if len(sys.argv)-1 >= number+1:
+                output = sys.argv[number+1]
+            else:
+                print("no output path after -o tag")
+                quit()
     if file == "None":
         print("no file provided")
         quit()
@@ -75,10 +85,24 @@ if sys.argv[1+change] == "compile":
     print("done compiling")
 
 if sys.argv[1+change] == "run":
-    speed = int(sys.argv[3+change])
-    file = sys.argv[2+change]
-    with open(file, "r") as f:
-        file_contents = f.read()
+    if len(sys.argv) == 2:
+        help("run")
+        quit()
+    if len(sys.argv)-1 >= 3+change:
+        speed = int(sys.argv[3+change])
+    else:
+        speed = 0
+    if len(sys.argv)-1 >= 2+change:
+        file = sys.argv[2+change]
+    else:
+        print("no file provied")
+        quit()
+    try:
+        with open(file, "r") as f:
+            file_contents = f.read()
+    except FileNotFoundError:
+        print(f"{file} is not a valid file path")
+        quit()
     plugins = file_contents.split("\n")[0].split(",")
     file_contents = file_contents.split("\n")[1]
     runner.run(file_contents, plugins, speed)
